@@ -7,6 +7,39 @@ on:
 
 jobs:
   publish:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     permissions:
-      id-token: write # Required for authentication using OIDC
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+      id-token: write # Required for OIDC authentication
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Publishing semantifix $version (triggered by tag ${{ github.ref_name }})"
+
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install dependencies
+        run: |
+          echo "Resolving dependencies..."
+          dart pub get
+          echo "Dependencies resolved."
+
+      - name: Validate package
+        run: |
+          echo "Running pre-publish validation..."
+          dart pub publish --dry-run
+          echo "Validation passed."
+
+      - name: Publish to pub.dev
+        run: |
+          echo "Publishing semantifix ${{ steps.version.outputs.version }} to pub.dev..."
+          dart pub publish --force
+          echo "Published successfully."
