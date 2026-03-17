@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Repro: with AI" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
+    <option name="filePath" value="$PROJECT_DIR$/tool/repro.dart" />
+    <option name="arguments" value="" />
+    <option name="workingDirectory" value="$PROJECT_DIR$" />
+    <envs>
+      <env name="ANTHROPIC_API_KEY" value="$ANTHROPIC_API_KEY$" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,0 +1,46 @@
+# Dart / Pub
+.dart_tool/
+.packages
+pubspec.lock
+build/
+doc/api/
+
+# Internal / private docs and tooling
+internal/
+CLAUDE.md
+.claude/
+
+# SemantiFix runtime artefacts
+.semantifix_reports/
+.semantifix_backups/
+*.sfix_tmp
+
+# IDE — VS Code
+.vscode/
+*.code-workspace
+
+# IDE — IntelliJ / Android Studio
+.idea/*
+!.idea/runConfigurations/
+*.iml
+*.iws
+*.ipr
+
+# Sensitive / credentials
+.env
+.env.*
+*.env
+ANTHROPIC_API_KEY
+*.pem
+*.key
+secrets.*
+
+# OS junk
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
