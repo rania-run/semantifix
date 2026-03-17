@@ -5,10 +5,6 @@ pubspec.lock
 build/
 doc/api/
 
-# Internal / private docs and tooling
-internal/
-CLAUDE.md
-.claude/
 
 # SemantiFix runtime artefacts
 .semantifix_reports/
