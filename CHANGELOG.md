@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1
+
+### Bug Fixes
+- fix: combine release and publish into single workflow to bypass GITHUB_TOKEN restriction (#5)
+
+### Other Changes
+- chore: add automated release preparation workflow (#7)
+
+
 ## 0.1.0
 
 - Initial release.

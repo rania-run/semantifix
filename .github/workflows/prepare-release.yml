@@ -1,0 +1,145 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: Version bump type
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: dev
+
+      - name: Calculate new version
+        id: version
+        run: |
+          current=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          new_version=$(python3 -c "
+          version = '$current'
+          parts = version.split('.')
+          major, minor, patch = int(parts[0]), int(parts[1]), int(parts[2])
+          bump = '${{ inputs.bump_type }}'
+          if bump == 'major':
+              major += 1; minor = 0; patch = 0
+          elif bump == 'minor':
+              minor += 1; patch = 0
+          else:
+              patch += 1
+          print(f'{major}.{minor}.{patch}')
+          ")
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "new=$new_version" >> "$GITHUB_OUTPUT"
+
+      - name: Collect commits since last tag
+        id: commits
+        run: |
+          last_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$last_tag" ]; then
+            git log "${last_tag}..HEAD" --oneline > /tmp/commits.txt
+          else
+            git log --oneline > /tmp/commits.txt
+          fi
+          echo "last_tag=${last_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate CHANGELOG entry
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new }}" python3 << 'PYEOF'
+          import os
+
+          version = os.environ["NEW_VERSION"]
+          commits_raw = open("/tmp/commits.txt").read()
+
+          features, fixes, other = [], [], []
+          for line in commits_raw.strip().splitlines():
+              parts = line.split(" ", 1)
+              msg = parts[1] if len(parts) > 1 else line
+              if msg.startswith("feat:") or msg.startswith("feat("):
+                  features.append(msg)
+              elif msg.startswith("fix:") or msg.startswith("fix("):
+                  fixes.append(msg)
+              else:
+                  other.append(msg)
+
+          sections = []
+          if features:
+              sections.append("### Features\n" + "\n".join(f"- {m}" for m in features))
+          if fixes:
+              sections.append("### Bug Fixes\n" + "\n".join(f"- {m}" for m in fixes))
+          if other:
+              sections.append("### Other Changes\n" + "\n".join(f"- {m}" for m in other))
+
+          body = "\n\n".join(sections) if sections else "- _No changes recorded._"
+          entry = f"## {version}\n\n{body}\n"
+          open("/tmp/changelog_entry.md", "w").write(entry)
+          print(entry)
+          PYEOF
+
+      - name: Update pubspec.yaml
+        run: |
+          sed -i "s/^version: ${{ steps.version.outputs.current }}$/version: ${{ steps.version.outputs.new }}/" pubspec.yaml
+
+      - name: Prepend to CHANGELOG.md
+        run: |
+          python3 << 'PYEOF'
+          import re
+
+          new_entry = open("/tmp/changelog_entry.md").read()
+          content = open("CHANGELOG.md").read()
+          # Insert after the first "# Changelog" heading line
+          updated = re.sub(r"(# Changelog\n)", r"\1\n" + new_entry + "\n", content, count=1)
+          open("CHANGELOG.md", "w").write(updated)
+          PYEOF
+
+      - name: Create release branch and push
+        run: |
+          branch="release/v${{ steps.version.outputs.new }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add pubspec.yaml CHANGELOG.md
+          git commit -m "chore: release v${{ steps.version.outputs.new }}"
+          git push origin "$branch"
+
+      - name: Open release PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          new_version="${{ steps.version.outputs.new }}"
+          old_version="${{ steps.version.outputs.current }}"
+          bump_type="${{ inputs.bump_type }}"
+          changelog_preview=$(cat /tmp/changelog_entry.md)
+
+          gh pr create \
+            --title "chore: release v${new_version}" \
+            --base main \
+            --head "release/v${new_version}" \
+            --body "## Release v${new_version}
+
+          Bumped version \`${old_version}\` → \`${new_version}\` (${bump_type} bump).
+
+          ### Changelog preview
+
+          ${changelog_preview}
+
+          ---
+          After merging, the release workflow will automatically:
+          - Create tag \`v${new_version}\` and GitHub Release
+          - Publish to pub.dev
+          - Open a sync PR from \`main\` back to \`dev\`"
