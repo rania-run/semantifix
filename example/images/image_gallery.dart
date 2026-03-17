@@ -50,7 +50,7 @@ class ImageGalleryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
         // ── 1. Image() — generic constructor ─────────────────────────────────
         //
@@ -61,7 +61,7 @@ class ImageGalleryScreen extends StatelessWidget {
         //
         // What SemantiFix adds (--skip-ai):
         //   semanticLabel: 'TODO: describe image'
-        const Image(),
+        Image(),
 
         // ── 2. Image.asset() — local asset ───────────────────────────────────
         //
@@ -72,7 +72,7 @@ class ImageGalleryScreen extends StatelessWidget {
         //
         // What SemantiFix adds (--skip-ai):
         //   semanticLabel: 'TODO: describe image'
-        const Image.asset('assets/images/logo.png'),
+        Image.asset('assets/images/logo.png'),
 
         // ── 3. Image.network() — remote image ────────────────────────────────
         //

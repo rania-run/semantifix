@@ -69,7 +69,7 @@ class WelcomeCard extends StatelessWidget {
       children: [
         // ✗ VIOLATION — screen readers cannot describe this image.
         //   SemantiFix will add: semanticLabel: 'Welcome banner image'
-        Image.network('https://example.com/welcome-banner.png'),
+        const Image.network('https://example.com/welcome-banner.png'),
 
         const Text('Welcome to the app!'),
 
