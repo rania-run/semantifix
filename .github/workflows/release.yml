@@ -40,7 +40,7 @@ jobs:
         run: |
           version="${{ steps.version.outputs.version }}"
           notes=$(python3 - <<EOF
-          import re
+          import re, sys
           content = open('CHANGELOG.md').read()
           match = re.search(r'## ' + re.escape("$version") + r'\n(.*?)(?=\n## |\Z)', content, re.DOTALL)
           print(match.group(1).strip() if match else '_No changelog entry found for this version._')
