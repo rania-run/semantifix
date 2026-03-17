@@ -12,7 +12,9 @@
 ## ✅ Quality Checklist
 - [ ] **Analysis:** `dart analyze` passes with zero hints/warnings.
 - [ ] **Formatting:** `dart format .` has been executed.
-- [ ] **Regression:** `INTERNAL/scripts/audit_run.sh` confirms no existing rules are broken.
+- [ ] **Regression:** `internal/scripts/audit_run.sh` confirms no existing rules are broken.
 - [ ] **AI Safety:** No API keys or sensitive credentials are committed.
 
-## 📸 Verification 
+## 🧪 Test Checklist
+
+## 📸 Verification
