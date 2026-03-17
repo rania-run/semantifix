@@ -2,7 +2,7 @@ name: semantifix
 description: >-
   SemantiFix — a professional CLI tool for detecting and AI-fixing accessibility
   violations in Flutter/Dart source files.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/rania-run/semantifix
 issue_tracker: https://github.com/rania-run/semantifix/issues
 topics:
